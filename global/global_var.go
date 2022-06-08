@@ -21,6 +21,6 @@ func Init() error {
 	}
 	go client.Start()
 	GVars.UartClient = client
-	GVars.StopCycleChan = make(chan struct{}, 4)
+	GVars.StopCycleChan = make(chan struct{}, 1)
 	return nil
 }

@@ -115,6 +115,10 @@ type Result struct {
 
 func (h *IrisHandler) StartCycleMatch(context *gin.Context) {
 
+	if len(global.GVars.StopCycleChan) > 0 {
+		<-global.GVars.StopCycleChan
+	}
+
 	res := &Result{
 		data: "",
 	}
@@ -160,6 +164,9 @@ func getMatchRes(s *Result) {
 }
 
 func (h *IrisHandler) StopCycleMatch(context *gin.Context) {
-	global.GVars.StopCycleChan <- struct{}{}
+
+	if len(global.GVars.StopCycleChan) == 0 {
+		global.GVars.StopCycleChan <- struct{}{}
+	}
 	ResponseOK(context)
 }

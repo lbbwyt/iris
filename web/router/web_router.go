@@ -28,13 +28,11 @@ func RegisterIrisRouter(rg *gin.RouterGroup) error {
 	// routes
 	{
 		rg.POST("/actions/register", handler.RegisterIris) // 虹膜注册
-		//rg.GET("/{uuid}/query", handler.RegisterIris)      // 备案用户查询
-		rg.POST("/actions/match", handler.MatchIris) // 虹膜识别
-		//rg.GET("/match/result", handler.RegisterIris)      // 识别结果查询
-		rg.DELETE("/delete", handler.DeleteAllUser)      // 删除所有用户
-		rg.POST("/mode", handler.ChangeMode)             // 切换虹膜预览模式
-		rg.POST("/cycle/start", handler.StartCycleMatch) // 开始循环识别
-		rg.POST("/cycle/stop", handler.StopCycleMatch)   // 停止循环识别
+		rg.POST("/actions/match", handler.MatchIris)       // 虹膜识别
+		rg.DELETE("/delete", handler.DeleteAllUser)        // 删除所有用户
+		rg.POST("/mode", handler.ChangeMode)               // 切换虹膜预览模式
+		rg.POST("/cycle/start", handler.StartCycleMatch)   // 开始循环识别
+		rg.POST("/cycle/stop", handler.StopCycleMatch)     // 停止循环识别
 	}
 	return nil
 }
