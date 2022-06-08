@@ -17,7 +17,7 @@ func NewIrisService() *IrisService {
 
 func (s *IrisService) RegisterIris(id, idType, region string) error {
 
-	idStr := fmt.Sprintf("%s%s%s", id, idType, region)
+	idStr := fmt.Sprintf("%s%s%s", region, idType, id)
 	log.Info(idStr)
 	prefix := "55002A0000000000430020"
 	suffix := "03"

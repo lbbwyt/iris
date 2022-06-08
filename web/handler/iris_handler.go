@@ -24,24 +24,33 @@ func NewIrisHandler() *IrisHandler {
 	}
 }
 
+type Request struct {
+	Id     string `json:"id"`
+	IdType string `json:"id_type"`
+	Region string `json:"region"`
+}
+
 func (h *IrisHandler) RegisterIris(ctx *gin.Context) {
 
-	id := ctx.Query("id")
+	request := &Request{}
+	BindJsonAndValid(ctx, request)
 
-	if "" == strings.TrimSpace(id) {
-		//ResponseBadRequest(ctx, "ID 不能为空")
+	//id := ctx.Query("id")
+
+	if "" == strings.TrimSpace(request.Id) {
 		Response(ctx, model.ResultError(http.StatusBadRequest, "ID 不能为空"))
 	}
-	idType := ctx.Query("id_type")
-	region := ctx.Query("region")
-	if idType == "" {
-		idType = constant.DefaultIdTypeHM
-	}
-	if region == "" {
-		region = constant.DefaultRegionMacao
+	//idType := ctx.Query("id_type")
+	//region := ctx.Query("region")
+	if request.IdType == "" {
+		request.IdType = constant.DefaultIdTypeHM
 	}
 
-	h.IrisService.RegisterIris(id, idType, region)
+	if request.Region == "" {
+		request.Region = constant.DefaultRegionMacao
+	}
+
+	h.IrisService.RegisterIris(request.Id, request.IdType, request.Region)
 	var res = "采集失败"
 	for {
 		select {
@@ -50,18 +59,16 @@ func (h *IrisHandler) RegisterIris(ctx *gin.Context) {
 				errorCode := utils.SubStr(res, 22, 2)
 				if errorCode == "00" {
 					res = "采集成功"
-					//ResponseJSON(ctx, http.StatusOK, res)
 					Response(ctx, model.ResultOk(res))
 
 				} else {
 					res = "采集失败"
-					//ResponseServerError(ctx, res)
 					Response(ctx, model.ResultError(http.StatusInternalServerError, res))
 				}
 				return
 			}
 		case <-time.After(15 * time.Second):
-			ResponseServerError(ctx, res)
+			Response(ctx, model.ResultError(http.StatusInternalServerError, res))
 			return
 		}
 	}
@@ -111,7 +118,6 @@ func (h *IrisHandler) ChangeMode(ctx *gin.Context) {
 }
 
 // StartCycleMatch /**
-
 // 循环识别和识别接口发送一样的命令到虹膜模组, 但需要循环发送
 
 type Result struct {
@@ -169,7 +175,6 @@ func getMatchRes(s *Result) {
 }
 
 func (h *IrisHandler) StopCycleMatch(ctx *gin.Context) {
-
 	if len(global.GVars.StopCycleChan) == 0 {
 		global.GVars.StopCycleChan <- struct{}{}
 	}
