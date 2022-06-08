@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"iris/web/model"
 	"net/http"
 )
 
@@ -82,4 +83,8 @@ func ResponseNoRegister(c *gin.Context) {
 
 func ResponseInvalidJSONBody(c *gin.Context) {
 	ResponseBadRequest(c, "JSON body 格式错误")
+}
+
+func Response(c *gin.Context, result model.Result) {
+	ResponseJSON(c, result.Code, result)
 }

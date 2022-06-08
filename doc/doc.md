@@ -10,3 +10,7 @@
 
 MO   澳门  
 CN    中国大陆
+
+
+# build
+go build -ldflags "-H windowsgui"

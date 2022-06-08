@@ -7,6 +7,7 @@ import (
 	"iris/constant"
 	"iris/global"
 	"iris/utils"
+	"iris/web/model"
 	"iris/web/service"
 	"net/http"
 	"strings"
@@ -28,7 +29,8 @@ func (h *IrisHandler) RegisterIris(ctx *gin.Context) {
 	id := ctx.Query("id")
 
 	if "" == strings.TrimSpace(id) {
-		ResponseBadRequest(ctx, "ID 不能为空")
+		//ResponseBadRequest(ctx, "ID 不能为空")
+		Response(ctx, model.ResultError(http.StatusBadRequest, "ID 不能为空"))
 	}
 	idType := ctx.Query("id_type")
 	region := ctx.Query("region")
@@ -48,10 +50,13 @@ func (h *IrisHandler) RegisterIris(ctx *gin.Context) {
 				errorCode := utils.SubStr(res, 22, 2)
 				if errorCode == "00" {
 					res = "采集成功"
-					ResponseJSON(ctx, http.StatusOK, res)
+					//ResponseJSON(ctx, http.StatusOK, res)
+					Response(ctx, model.ResultOk(res))
+
 				} else {
 					res = "采集失败"
-					ResponseServerError(ctx, res)
+					//ResponseServerError(ctx, res)
+					Response(ctx, model.ResultError(http.StatusInternalServerError, res))
 				}
 				return
 			}
@@ -61,7 +66,7 @@ func (h *IrisHandler) RegisterIris(ctx *gin.Context) {
 		}
 	}
 
-	ResponseServerError(ctx, res)
+	Response(ctx, model.ResultError(http.StatusInternalServerError, res))
 }
 
 func (h *IrisHandler) MatchIris(ctx *gin.Context) {
@@ -79,30 +84,30 @@ func (h *IrisHandler) MatchIris(ctx *gin.Context) {
 				} else {
 					res = ""
 				}
-				ResponseJSON(ctx, http.StatusOK, res)
+				Response(ctx, model.ResultOk(res))
 				return
 			}
 		case <-time.After(15 * time.Second):
-			ResponseJSON(ctx, http.StatusOK, res)
+			Response(ctx, model.ResultOk(res))
 			return
 		}
 	}
 
-	ResponseJSON(ctx, http.StatusOK, res)
+	Response(ctx, model.ResultOk(res))
 }
 
 // DeleteAllUser /*
-func (h *IrisHandler) DeleteAllUser(context *gin.Context) {
+func (h *IrisHandler) DeleteAllUser(ctx *gin.Context) {
 	data := "55 00 2A 00 00 00 00 00 44 00 20 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E4 03"
 	global.GVars.UartClient.SendMsg(utils.TrimHexStr(data))
-	ResponseOK(context)
+	Response(ctx, model.ResultOk(nil))
 }
 
 // ChangeMode /**
-func (h *IrisHandler) ChangeMode(context *gin.Context) {
+func (h *IrisHandler) ChangeMode(ctx *gin.Context) {
 	data := "55 00 0E 00 00 00 00 00 7A 00 04 00 00 00 00 DA 03"
 	global.GVars.UartClient.SendMsg(utils.TrimHexStr(data))
-	ResponseOK(context)
+	Response(ctx, model.ResultOk(nil))
 }
 
 // StartCycleMatch /**
@@ -113,7 +118,7 @@ type Result struct {
 	data string
 }
 
-func (h *IrisHandler) StartCycleMatch(context *gin.Context) {
+func (h *IrisHandler) StartCycleMatch(ctx *gin.Context) {
 
 	if len(global.GVars.StopCycleChan) > 0 {
 		<-global.GVars.StopCycleChan
@@ -130,7 +135,7 @@ func (h *IrisHandler) StartCycleMatch(context *gin.Context) {
 			log.Infof("res: %v", res)
 
 			if res.data != "" {
-				ResponseJSON(context, http.StatusOK, res.data)
+				Response(ctx, model.ResultOk(res))
 				return
 			}
 			global.GVars.UartClient.SendMsg(utils.TrimHexStr(constant.IrisDataMatch))
@@ -138,7 +143,7 @@ func (h *IrisHandler) StartCycleMatch(context *gin.Context) {
 			time.Sleep(6 * time.Second)
 		}
 	}
-	ResponseJSON(context, http.StatusOK, res)
+	Response(ctx, model.ResultOk(res))
 }
 
 // 获取循环识别的返回结果
@@ -163,10 +168,10 @@ func getMatchRes(s *Result) {
 
 }
 
-func (h *IrisHandler) StopCycleMatch(context *gin.Context) {
+func (h *IrisHandler) StopCycleMatch(ctx *gin.Context) {
 
 	if len(global.GVars.StopCycleChan) == 0 {
 		global.GVars.StopCycleChan <- struct{}{}
 	}
-	ResponseOK(context)
+	Response(ctx, model.ResultOk(nil))
 }
