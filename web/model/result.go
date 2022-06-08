@@ -13,7 +13,7 @@ func ResultOk(data interface{}) Result {
 	return Result{
 		Success: true,
 		Code:    http.StatusOK,
-		Message: "success",
+		Message: "成功",
 		Data:    data,
 	}
 }

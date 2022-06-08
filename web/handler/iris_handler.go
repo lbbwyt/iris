@@ -34,14 +34,9 @@ func (h *IrisHandler) RegisterIris(ctx *gin.Context) {
 
 	request := &Request{}
 	BindJsonAndValid(ctx, request)
-
-	//id := ctx.Query("id")
-
 	if "" == strings.TrimSpace(request.Id) {
 		Response(ctx, model.ResultError(http.StatusBadRequest, "ID 不能为空"))
 	}
-	//idType := ctx.Query("id_type")
-	//region := ctx.Query("region")
 	if request.IdType == "" {
 		request.IdType = constant.DefaultIdTypeHM
 	}
@@ -60,26 +55,28 @@ func (h *IrisHandler) RegisterIris(ctx *gin.Context) {
 				if errorCode == "00" {
 					res = "采集成功"
 					Response(ctx, model.ResultOk(res))
-
+					return
 				} else {
 					res = "采集失败"
-					Response(ctx, model.ResultError(http.StatusInternalServerError, res))
+					Response(ctx, model.ResultError(http.StatusOK, res))
+					return
 				}
-				return
+
 			}
 		case <-time.After(15 * time.Second):
-			Response(ctx, model.ResultError(http.StatusInternalServerError, res))
+			Response(ctx, model.ResultError(http.StatusOK, res))
 			return
+		default:
+
 		}
 	}
 
-	Response(ctx, model.ResultError(http.StatusInternalServerError, res))
+	Response(ctx, model.ResultError(http.StatusOK, res))
 }
 
 func (h *IrisHandler) MatchIris(ctx *gin.Context) {
 	global.GVars.UartClient.SendMsg(utils.TrimHexStr(constant.IrisDataMatch))
 	var res = ""
-
 	for {
 		select {
 		case res = <-global.GVars.UartClient.OutBuffer:
@@ -97,6 +94,8 @@ func (h *IrisHandler) MatchIris(ctx *gin.Context) {
 		case <-time.After(15 * time.Second):
 			Response(ctx, model.ResultOk(res))
 			return
+		default:
+
 		}
 	}
 
@@ -141,7 +140,8 @@ func (h *IrisHandler) StartCycleMatch(ctx *gin.Context) {
 			log.Infof("res: %v", res)
 
 			if res.data != "" {
-				Response(ctx, model.ResultOk(res))
+				log.Infof("匹配成功！" + res.data)
+				Response(ctx, model.ResultOk(res.data))
 				return
 			}
 			global.GVars.UartClient.SendMsg(utils.TrimHexStr(constant.IrisDataMatch))
@@ -169,6 +169,9 @@ func getMatchRes(s *Result) {
 					return
 				}
 			}
+
+		default:
+
 		}
 	}
 
