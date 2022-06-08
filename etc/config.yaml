@@ -1,0 +1,7 @@
+web:
+  port: 8899
+tcp:
+  port: 9403
+uart:
+  port_name: COM4
+  baud_rate: 1500000
